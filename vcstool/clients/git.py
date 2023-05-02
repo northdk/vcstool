@@ -34,6 +34,7 @@ class GitClient(VcsClientBase):
         super(GitClient, self).__init__(path)
 
     def branch(self, command):
+        # print("git branch oncall")
         self._check_executable()
         cmd = [GitClient._executable, 'branch']
         result = self._run_command(cmd)
@@ -45,6 +46,46 @@ class GitClient(VcsClientBase):
             result['output'] = '\n'.join(lines)
 
         return result
+
+    """
+    custom command for git rolling, by North.D.K
+    """
+    def rolling(self, command):
+        # print(f"git rolling oncall: {command}")
+        self._check_executable()
+
+        # check currunt branch operation is valid
+        cmd = [GitClient._executable, 'checkout', 'rolling']
+        checkout_result = self._run_command(cmd)
+        # print(result)
+        if checkout_result['returncode'] != 0:
+            checkout_result['output'] = ("Checkout rolling branch failed.")
+            return checkout_result
+        else:
+            checkout_result['output'] = ("Checkout rolling branch success.")
+
+        result = checkout_result
+
+        # check rebase的结果，是否需要增加commit的hash判断?
+        cmd = [GitClient._executable, 'rebase', 'dev']
+        rebase_result = self._run_command(cmd)
+        if rebase_result['returncode'] != 0:
+            rebase_result['output'] = ("\nRebase rolling branch failed.")
+        else:
+            rebase_result['output'] = ("\nRebase rolling branch success.")
+
+
+        if not command.all and not result['returncode']:
+            # only rebase current branch
+            # print(">>> " + result['output'])
+            result['output'] += rebase_result['output']
+            result['returncode'] = rebase_result['returncode']
+            lines = result['output'].splitlines()
+            lines = [line[2:] for line in lines if line.startswith('* ')]
+            result['output'] += '\n'.join(lines)
+
+        return result
+
 
     def custom(self, command):
         self._check_executable()

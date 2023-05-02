@@ -10,6 +10,8 @@ from .remotes import RemotesCommand
 from .status import StatusCommand
 from .validate import ValidateCommand
 
+from .rolling import RollingCommand
+
 vcstool_commands = []
 vcstool_commands.append(BranchCommand)
 vcstool_commands.append(CustomCommand)
@@ -22,6 +24,7 @@ vcstool_commands.append(PushCommand)
 vcstool_commands.append(RemotesCommand)
 vcstool_commands.append(StatusCommand)
 vcstool_commands.append(ValidateCommand)
+vcstool_commands.append(RollingCommand)
 
 _commands = [c.command for c in vcstool_commands]
 if len(_commands) != len(set(_commands)):

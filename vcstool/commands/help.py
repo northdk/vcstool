@@ -1,6 +1,8 @@
 import argparse
 import sys
 
+import traceback # dk added for debugging
+
 from pkg_resources import load_entry_point
 from vcstool.clients import vcstool_clients
 from vcstool.commands import vcstool_commands
@@ -14,10 +16,16 @@ def main(args=None, stdout=None, stderr=None):
     parser = get_parser(add_help=False)
     ns, _ = parser.parse_known_args(args)
 
+    print("traceback:")
+    stack = traceback.extract_stack()
+    caller_frame = stack[-2]
+    print(f"Caller: {caller_frame.name} in file {caller_frame.filename}, line {caller_frame.lineno}")
+
     # help for a specific command
     if ns.command:
         # relay help request foe specific command
         entrypoint = get_entrypoint(ns.command)
+        print(entrypoint)
         if not entrypoint:
             return 1
         return entrypoint(['--help'])
